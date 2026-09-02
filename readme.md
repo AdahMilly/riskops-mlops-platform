@@ -2,6 +2,58 @@
 
 > An end-to-end fraud detection platform combining **MLOps, LLMOps, Agentic AI, DevSecOps, Kubernetes, and GitOps**.
 
+# RiskOps
+
+Production-oriented MLOps and AI investigation platform for transaction fraud
+and risk detection.
+
+## Objective
+
+Demonstrate an end-to-end production ML platform covering:
+
+- Data engineering and validation
+- Model training and evaluation
+- Experiment tracking and model registry
+- Real-time model serving
+- AI-assisted fraud investigation
+- RAG and agent orchestration
+- DevSecOps
+- Kubernetes
+- GitOps
+- Observability
+- Model and data drift
+- Continuous retraining
+
+## Architecture
+
+````text
+Transaction
+     │
+     ▼
+ FastAPI
+     │
+     ▼
+ Fraud ML Model
+     │
+     ├── LOW ───────► Approve
+     │
+     ├── MEDIUM ────► Review
+     │
+     └── HIGH ──────► AI Investigation
+                            │
+                            ▼
+                       LangGraph
+                            │
+                 ┌──────────┼──────────┐
+                 ▼          ▼          ▼
+              Customer   History    Model
+              Evidence   Analysis   Explainability
+                 │          │          │
+                 └──────────┼──────────┘
+                            ▼
+                       Investigation
+                          Report
+
 ## 1. Objective
 
 Build a production-style platform that:
@@ -56,7 +108,7 @@ Profile   Analysis    Analysis
             │
             ▼
       Feedback / Retraining
-```
+````
 
 ### Platform
 
