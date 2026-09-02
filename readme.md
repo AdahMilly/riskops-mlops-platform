@@ -2,8 +2,6 @@
 
 > An end-to-end fraud detection platform combining **MLOps, LLMOps, Agentic AI, DevSecOps, Kubernetes, and GitOps**.
 
-# RiskOps
-
 Production-oriented MLOps and AI investigation platform for transaction fraud
 and risk detection.
 
