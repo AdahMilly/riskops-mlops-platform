@@ -19,6 +19,10 @@ stages:
       hash: md5
       md5: ab0a094c9a750b740a05fc1e1963878e
       size: 670
+    - path: src/riskops/data/quality.py
+      hash: md5
+      md5: c0568c9e12fe3df5e572186076273e09
+      size: 2850
     - path: src/riskops/data/schema.py
       hash: md5
       md5: 61a797949caa9cfb94e80888cf51ebe1
