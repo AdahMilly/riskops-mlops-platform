@@ -7,7 +7,12 @@ name = "riskops"
 version = "0.1.0"
 description = "Production-grade MLOps and AI investigation platform"
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "pandera>=0.26",
+    "pyyaml>=6.0",
+]
 
 [project.optional-dependencies]
 dev = [
