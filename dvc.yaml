@@ -1,0 +1,17 @@
+stages:
+  prepare_data:
+    cmd: python scripts/prepare_data.py
+    deps:
+      - data/raw/transactions.csv
+      - scripts/prepare_data.py
+      - src/riskops/data/features.py
+      - src/riskops/data/pipeline.py
+      - src/riskops/data/quality.py
+      - src/riskops/data/schema.py
+      - src/riskops/data/split.py
+      - src/riskops/data/validation.py
+    outs:
+      - data/processed/transactions.csv
+      - data/splits/train.csv
+      - data/splits/validation.csv
+      - data/splits/test.csv

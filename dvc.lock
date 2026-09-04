@@ -1,0 +1,54 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python scripts/prepare_data.py
+    deps:
+    - path: data/raw/transactions.csv
+      hash: md5
+      md5: 2aab5d653b7f0429de1bfb5e4bc11faa
+      size: 1062481
+    - path: scripts/prepare_data.py
+      hash: md5
+      md5: ab5058fb21ed585923ad3ef3f92bcbe6
+      size: 350
+    - path: src/riskops/data/features.py
+      hash: md5
+      md5: ef51e9f1ec97df10ce611b7c46fb0c33
+      size: 535
+    - path: src/riskops/data/pipeline.py
+      hash: md5
+      md5: ab0a094c9a750b740a05fc1e1963878e
+      size: 670
+    - path: src/riskops/data/quality.py
+      hash: md5
+      md5: c0568c9e12fe3df5e572186076273e09
+      size: 2850
+    - path: src/riskops/data/schema.py
+      hash: md5
+      md5: 61a797949caa9cfb94e80888cf51ebe1
+      size: 631
+    - path: src/riskops/data/split.py
+      hash: md5
+      md5: 5be0dbf74b14934346001ded2f9aa731
+      size: 1637
+    - path: src/riskops/data/validation.py
+      hash: md5
+      md5: e44a3790d3b92d7649cec49e34043efd
+      size: 799
+    outs:
+    - path: data/processed/transactions.csv
+      hash: md5
+      md5: efa41702d38d83463e51ced16fa25641
+      size: 1343679
+    - path: data/splits/test.csv
+      hash: md5
+      md5: 70cd1c43295b7f64628f0df273996238
+      size: 201896
+    - path: data/splits/train.csv
+      hash: md5
+      md5: c0c257b68570f2c631ab2f7f176b387b
+      size: 941057
+    - path: data/splits/validation.csv
+      hash: md5
+      md5: 5701e55de8403405e2485469e60e0201
+      size: 201248

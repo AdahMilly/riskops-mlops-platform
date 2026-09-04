@@ -44,14 +44,33 @@ models/
 model_registry/
 
 # Data
-data/raw/
-data/processed/
-data/interim/
+data/raw/*
+data/processed/*
+data/interim/*
+data/splits/*
+
+# Keep DVC metadata and directory structure
+!data/raw/.gitkeep
+!data/raw/*.dvc
+
+!data/processed/.gitkeep
+!data/processed/*.dvc
+
+!data/interim/.gitkeep
+!data/interim/*.dvc
+
+!data/splits/.gitkeep
+!data/splits/*.dvc
+
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
 
 # Keep directory structure
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/interim/.gitkeep
+!data/splits/.gitkeep
 
 # Experiment outputs
 experiments/
