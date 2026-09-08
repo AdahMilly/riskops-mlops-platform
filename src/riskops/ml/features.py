@@ -14,6 +14,10 @@ NUMERICAL_FEATURES: tuple[str, ...] = (
     "amount_to_24h_ratio",
     "velocity_risk",
     "high_value_transaction",
+    "international_velocity_risk",
+    "international_high_value",
+    "transaction_velocity_per_age",
+    "amount_share_of_24h",
 )
 
 CATEGORICAL_FEATURES: tuple[str, ...] = (

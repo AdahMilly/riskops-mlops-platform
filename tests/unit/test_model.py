@@ -16,6 +16,10 @@ def test_model_pipeline_can_fit_and_predict():
             "amount_to_24h_ratio": [0.2, 0.5, 1.0, 0.5],
             "velocity_risk": [0, 1, 0, 1],
             "high_value_transaction": [0, 1, 0, 1],
+            "international_velocity_risk": [0, 1, 0, 1],
+            "international_high_value": [0, 1, 0, 1],
+            "transaction_velocity_per_age": [0.02, 0.75, 0.005, 2.0],
+            "amount_share_of_24h": [0.2, 0.5, 1.0, 0.5],
             "currency": ["KES", "USD", "KES", "EUR"],
             "merchant_category": [
                 "retail",
