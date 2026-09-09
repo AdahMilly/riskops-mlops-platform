@@ -1,3 +1,5 @@
+from typing import Any
+
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -38,11 +40,16 @@ def build_preprocessor() -> ColumnTransformer:
     )
 
 
-def build_logistic_regression() -> Pipeline:
+def build_logistic_regression(
+    parameters: dict[str, Any] | None = None,
+) -> Pipeline:
+    parameters = parameters or {}
+
     classifier = LogisticRegression(
         max_iter=1000,
         class_weight="balanced",
         random_state=42,
+        C=parameters.get("C", 1.0),
     )
 
     return Pipeline(
@@ -53,12 +60,18 @@ def build_logistic_regression() -> Pipeline:
     )
 
 
-def build_random_forest() -> Pipeline:
+def build_random_forest(
+    parameters: dict[str, Any] | None = None,
+) -> Pipeline:
+    parameters = parameters or {}
+
     classifier = RandomForestClassifier(
         n_estimators=300,
         class_weight="balanced",
         random_state=42,
         n_jobs=-1,
+        max_depth=parameters.get("max_depth"),
+        min_samples_leaf=parameters.get("min_samples_leaf", 1),
     )
 
     return Pipeline(

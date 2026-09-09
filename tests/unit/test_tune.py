@@ -1,10 +1,10 @@
 import pandas as pd
 
-from riskops.ml.compare import compare_models
 from riskops.ml.model import build_logistic_regression
+from riskops.ml.tune import tune_model
 
 
-def test_compare_models_returns_metrics():
+def test_tune_model_returns_sorted_results():
     dataframe = pd.DataFrame(
         {
             "amount": [100.0, 1500.0, 200.0, 2500.0],
@@ -44,21 +44,16 @@ def test_compare_models_returns_metrics():
         }
     )
 
-    results = compare_models(
+    results = tune_model(
         train_data=dataframe,
         validation_data=dataframe,
-        models={
-            "logistic_regression": build_logistic_regression,
-        },
+        model_builder=build_logistic_regression,
+        parameter_grid=[
+            {"C": 0.1},
+            {"C": 1.0},
+        ],
     )
 
-    assert "logistic_regression" in results
-
-    metrics = results["logistic_regression"]
-
-    assert "precision" in metrics
-    assert "recall" in metrics
-    assert "f1" in metrics
-    assert "roc_auc" in metrics
-    assert "pr_auc" in metrics
-    assert "confusion_matrix" in metrics
+    assert len(results) == 2
+    assert list(results.columns).count("pr_auc") == 1
+    assert results.iloc[0]["pr_auc"] >= results.iloc[1]["pr_auc"]

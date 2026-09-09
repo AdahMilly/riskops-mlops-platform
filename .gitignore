@@ -107,3 +107,5 @@ kind-config.yaml
 *.tmp
 *.temp
 *.bak
+
+mlruns/
