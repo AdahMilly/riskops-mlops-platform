@@ -108,4 +108,6 @@ kind-config.yaml
 *.temp
 *.bak
 
+#mlflow
 mlruns/
+mlflow.db
