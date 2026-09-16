@@ -2,7 +2,13 @@ from collections.abc import Sequence
 
 import pandas as pd
 
-ALLOWED_CURRENCIES = {"KES", "USD", "EUR", "GBP"}
+ALLOWED_CURRENCIES = {
+    "KES",
+    "USD",
+    "EUR",
+    "GBP",
+}
+
 ALLOWED_MERCHANT_CATEGORIES = {
     "retail",
     "ecommerce",
@@ -12,7 +18,17 @@ ALLOWED_MERCHANT_CATEGORIES = {
     "electronics",
     "financial",
 }
-ALLOWED_COUNTRIES = {"KE", "UG", "TZ", "NG", "ZA", "GB", "US"}
+
+ALLOWED_COUNTRIES = {
+    "KE",
+    "UG",
+    "TZ",
+    "NG",
+    "ZA",
+    "GB",
+    "US",
+}
+
 ALLOWED_PAYMENT_METHODS = {
     "card",
     "mobile_money",
@@ -31,6 +47,7 @@ LEAKAGE_COLUMNS = {
 def run_quality_checks(
     dataframe: pd.DataFrame,
     leakage_columns: Sequence[str] | None = None,
+    require_target: bool = True,
 ) -> None:
     """Run business and data-quality checks on transaction data."""
 
@@ -48,8 +65,10 @@ def run_quality_checks(
         "customer_age_days",
         "transactions_last_24h",
         "amount_last_24h",
-        "is_fraud",
     }
+
+    if require_target:
+        required_columns.add("is_fraud")
 
     missing_columns = required_columns - set(dataframe.columns)
 
@@ -77,8 +96,9 @@ def run_quality_checks(
     if not dataframe["payment_method"].isin(ALLOWED_PAYMENT_METHODS).all():
         raise ValueError("Invalid payment method detected.")
 
-    if not dataframe["is_fraud"].isin([0, 1]).all():
-        raise ValueError("is_fraud must contain only 0 or 1.")
+    if "is_fraud" in dataframe.columns:
+        if not dataframe["is_fraud"].isin([0, 1]).all():
+            raise ValueError("is_fraud must contain only 0 or 1.")
 
     if not dataframe["is_international"].isin([True, False]).all():
         raise ValueError("is_international must contain only True or False.")
