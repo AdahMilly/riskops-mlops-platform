@@ -32,15 +32,25 @@ BOOLEAN_FEATURES: tuple[str, ...] = ("is_international",)
 FEATURE_COLUMNS: tuple[str, ...] = NUMERICAL_FEATURES + CATEGORICAL_FEATURES + BOOLEAN_FEATURES
 
 
+def select_features(
+    dataframe: pd.DataFrame,
+) -> pd.DataFrame:
+    missing_columns = set(FEATURE_COLUMNS) - set(dataframe.columns)
+
+    if missing_columns:
+        raise ValueError(f"Missing required feature columns: {sorted(missing_columns)}")
+
+    return dataframe.loc[:, FEATURE_COLUMNS].copy()
+
+
 def prepare_features(
     dataframe: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.Series]:
-    missing_columns = set(FEATURE_COLUMNS + (TARGET_COLUMN,)) - set(dataframe.columns)
+    features = select_features(dataframe)
 
-    if missing_columns:
-        raise ValueError(f"Missing required ML columns: {sorted(missing_columns)}")
+    if TARGET_COLUMN not in dataframe.columns:
+        raise ValueError(f"Missing required target column: {TARGET_COLUMN}")
 
-    features = dataframe.loc[:, FEATURE_COLUMNS].copy()
     target = dataframe[TARGET_COLUMN].copy()
 
     return features, target
