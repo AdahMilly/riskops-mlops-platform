@@ -14,6 +14,7 @@ from riskops.ml.registry import (
     PRODUCTION_ALIAS,
     REGISTERED_MODEL_NAME,
 )
+from riskops.ml.tracking import configure_mlflow
 from riskops.serving.schemas import (
     RiskResponse,
     TransactionRequest,
@@ -28,6 +29,8 @@ MODEL_ALIAS = os.getenv(
     "RISKOPS_MODEL_ALIAS",
     PRODUCTION_ALIAS,
 )
+
+configure_mlflow()
 
 
 app = FastAPI(

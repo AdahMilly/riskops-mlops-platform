@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 import mlflow
@@ -7,12 +8,18 @@ EXPERIMENT_NAME = "riskops-fraud-detection"
 DEFAULT_TRACKING_URI = "sqlite:///mlflow.db"
 
 
-def configure_tracking(
-    experiment_name: str = EXPERIMENT_NAME,
-    tracking_uri: str = DEFAULT_TRACKING_URI,
+DEFAULT_TRACKING_URI = "sqlite:///mlflow.db"
+
+
+def configure_mlflow(
+    tracking_uri: str | None = None,
 ) -> None:
-    mlflow.set_tracking_uri(tracking_uri)
-    mlflow.set_experiment(experiment_name)
+    uri = tracking_uri or os.getenv(
+        "MLFLOW_TRACKING_URI",
+        DEFAULT_TRACKING_URI,
+    )
+
+    mlflow.set_tracking_uri(uri)
 
 
 def log_model_run(
