@@ -17,6 +17,7 @@ dependencies = [
     "matplotlib",
     "fastapi",
     "uvicorn",
+    "langgraph",
 ]
 
 [project.optional-dependencies]
