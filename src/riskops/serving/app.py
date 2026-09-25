@@ -1,23 +1,20 @@
 import os
-from typing import Any
 
-import mlflow.sklearn
-import pandas as pd
 from fastapi import FastAPI, HTTPException
 
-from riskops.data.features import build_features
-from riskops.data.validation import (
-    validate_inference_transaction,
-)
-from riskops.ml.features import select_features
+from riskops.investigation.graph import build_investigation_graph
+from riskops.investigation.schemas import InvestigationRequest
 from riskops.ml.registry import (
     PRODUCTION_ALIAS,
     REGISTERED_MODEL_NAME,
 )
+from riskops.ml.tracking import configure_mlflow
+from riskops.serving.risk import determine_risk_level
 from riskops.serving.schemas import (
     RiskResponse,
     TransactionRequest,
 )
+from riskops.serving.service import PredictionService
 
 MODEL_NAME = os.getenv(
     "RISKOPS_MODEL_NAME",
@@ -29,6 +26,15 @@ MODEL_ALIAS = os.getenv(
     PRODUCTION_ALIAS,
 )
 
+configure_mlflow()
+
+prediction_service = PredictionService(
+    model_name=MODEL_NAME,
+    model_alias=MODEL_ALIAS,
+)
+
+investigation_graph = build_investigation_graph()
+
 
 app = FastAPI(
     title="RiskOps Fraud Detection API",
@@ -37,98 +43,73 @@ app = FastAPI(
 )
 
 
-_model: Any | None = None
-
-
-def load_production_model() -> Any:
-    model_uri = f"models:/{MODEL_NAME}@{MODEL_ALIAS}"
-
-    return mlflow.sklearn.load_model(model_uri)
-
-
-def get_model() -> Any:
-    global _model
-
-    if _model is None:
-        _model = load_production_model()
-
-    return _model
-
-
-def determine_risk_level(
-    probability: float,
-) -> str:
-    if probability >= 0.70:
-        return "HIGH"
-
-    if probability >= 0.30:
-        return "MEDIUM"
-
-    return "LOW"
-
-
-def prepare_transaction(
-    transaction: TransactionRequest,
-) -> pd.DataFrame:
-    raw_transaction = pd.DataFrame([transaction.model_dump()])
-
-    validated_transaction = validate_inference_transaction(raw_transaction)
-
-    engineered_features = build_features(validated_transaction)
-
-    model_features = select_features(engineered_features)
-
-    return model_features
-
-
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {
-        "status": "healthy",
-    }
+    """Return service health."""
+
+    return {"status": "healthy"}
 
 
 @app.get("/ready")
 def readiness() -> dict[str, str]:
+    """Verify that the production model can be loaded."""
+
     try:
-        get_model()
+        prediction_service.get_model()
     except Exception as error:
         raise HTTPException(
             status_code=503,
             detail=f"Model unavailable: {error}",
         ) from error
 
-    return {
-        "status": "ready",
-    }
+    return {"status": "ready"}
 
 
-@app.post(
-    "/predict",
-    response_model=RiskResponse,
-)
-def predict(
-    transaction: TransactionRequest,
-) -> RiskResponse:
+@app.post("/predict", response_model=RiskResponse)
+def predict(transaction: TransactionRequest) -> RiskResponse:
+    """Score a transaction and investigate high-risk transactions."""
+
     try:
-        model = get_model()
-
-        features = prepare_transaction(transaction)
-
-        probability = float(model.predict_proba(features)[0, 1])
-
+        probability = prediction_service.predict_probability(transaction)
         risk_level = determine_risk_level(probability)
+
+        investigation = None
+
+        if risk_level == "HIGH":
+            investigation_request = InvestigationRequest(
+                transaction_id=transaction.transaction_id,
+                customer_id=transaction.customer_id,
+                fraud_probability=probability,
+                risk_level=risk_level,
+                amount=transaction.amount,
+                currency=transaction.currency,
+                merchant_category=transaction.merchant_category,
+                country=transaction.country,
+                payment_method=transaction.payment_method,
+                device_id=transaction.device_id,
+                is_international=transaction.is_international,
+                transactions_last_24h=transaction.transactions_last_24h,
+                amount_last_24h=transaction.amount_last_24h,
+            )
+
+            result = investigation_graph.invoke(
+                {
+                    "request": investigation_request,
+                }
+            )
+
+            investigation = result["report"]
 
         return RiskResponse(
             fraud_probability=probability,
             risk_level=risk_level,
             model_name=MODEL_NAME,
             model_version=MODEL_ALIAS,
+            investigation=investigation,
         )
 
     except HTTPException:
         raise
-
     except Exception as error:
         raise HTTPException(
             status_code=500,

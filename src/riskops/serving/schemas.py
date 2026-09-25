@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from riskops.investigation.schemas import InvestigationReport
+
 
 class TransactionRequest(BaseModel):
     transaction_id: str
@@ -29,16 +31,8 @@ class TransactionRequest(BaseModel):
 
 
 class RiskResponse(BaseModel):
-    fraud_probability: float = Field(
-        ge=0,
-        le=1,
-    )
-
-    risk_level: Literal[
-        "LOW",
-        "MEDIUM",
-        "HIGH",
-    ]
-
+    fraud_probability: float = Field(ge=0, le=1)
+    risk_level: Literal["LOW", "MEDIUM", "HIGH"]
     model_name: str
     model_version: str
+    investigation: InvestigationReport | None = None
