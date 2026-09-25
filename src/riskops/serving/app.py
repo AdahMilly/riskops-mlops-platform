@@ -2,6 +2,8 @@ import os
 
 from fastapi import FastAPI, HTTPException
 
+from riskops.investigation.graph import build_investigation_graph
+from riskops.investigation.schemas import InvestigationRequest
 from riskops.ml.registry import (
     PRODUCTION_ALIAS,
     REGISTERED_MODEL_NAME,
@@ -30,6 +32,8 @@ prediction_service = PredictionService(
     model_name=MODEL_NAME,
     model_alias=MODEL_ALIAS,
 )
+
+investigation_graph = build_investigation_graph()
 
 
 app = FastAPI(
@@ -61,30 +65,51 @@ def readiness() -> dict[str, str]:
     return {"status": "ready"}
 
 
-@app.post(
-    "/predict",
-    response_model=RiskResponse,
-)
-def predict(
-    transaction: TransactionRequest,
-) -> RiskResponse:
-    """Score a transaction using the production model."""
+@app.post("/predict", response_model=RiskResponse)
+def predict(transaction: TransactionRequest) -> RiskResponse:
+    """Score a transaction and investigate high-risk transactions."""
 
     try:
         probability = prediction_service.predict_probability(transaction)
-
         risk_level = determine_risk_level(probability)
+
+        investigation = None
+
+        if risk_level == "HIGH":
+            investigation_request = InvestigationRequest(
+                transaction_id=transaction.transaction_id,
+                customer_id=transaction.customer_id,
+                fraud_probability=probability,
+                risk_level=risk_level,
+                amount=transaction.amount,
+                currency=transaction.currency,
+                merchant_category=transaction.merchant_category,
+                country=transaction.country,
+                payment_method=transaction.payment_method,
+                device_id=transaction.device_id,
+                is_international=transaction.is_international,
+                transactions_last_24h=transaction.transactions_last_24h,
+                amount_last_24h=transaction.amount_last_24h,
+            )
+
+            result = investigation_graph.invoke(
+                {
+                    "request": investigation_request,
+                }
+            )
+
+            investigation = result["report"]
 
         return RiskResponse(
             fraud_probability=probability,
             risk_level=risk_level,
             model_name=MODEL_NAME,
             model_version=MODEL_ALIAS,
+            investigation=investigation,
         )
 
     except HTTPException:
         raise
-
     except Exception as error:
         raise HTTPException(
             status_code=500,
